@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"sync"
 	"time"
 )
 
@@ -47,9 +48,36 @@ func quiz() (int, int) {
 }
 
 func main() {
+
+	done := make(chan struct{})
 	start := time.Now()
-	numCorrect, numQuestions := quiz()
+
+	go func() {
+		ticker := time.NewTicker(1 * time.Second)
+		defer ticker.Stop()
+		seconds := 0
+		for {
+			select {
+			case <-done:
+				return
+			case <-ticker.C:
+				seconds++
+				fmt.Printf("time elapsed %d seconds\n", seconds)
+			}
+		}
+	}()
+
+	var wg sync.WaitGroup
+	wg.Add(1)
+	// numCorrect, numQuestions := go quiz()
+	var numCorrect, numQuestions int
+	go func() {
+		defer wg.Done()
+		numCorrect, numQuestions = quiz()
+		close(done)
+	}()
+	wg.Wait()
 	end := time.Since(start)
 	fmt.Printf("You got %d / %d correct\n", numCorrect, numQuestions)
-	fmt.Printf("and took %v seconds", end)
+	fmt.Printf("and took %v seconds\n", end)
 }
