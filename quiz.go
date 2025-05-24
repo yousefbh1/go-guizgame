@@ -6,9 +6,10 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"time"
 )
 
-func main() {
+func quiz() (int, int) {
 	f, err := os.Open("problems.csv")
 	if err != nil {
 		log.Fatal(err)
@@ -36,12 +37,19 @@ func main() {
 		fmt.Print("Enter answer: ")
 		_, err1 := fmt.Scan(&input)
 		if err1 != nil {
-			fmt.Println("Error:", err)
-			return
+			log.Fatal(err)
 		}
 		if answer == input {
 			numCorrect += 1
 		}
 	}
+	return numCorrect, numQuestions
+}
+
+func main() {
+	start := time.Now()
+	numCorrect, numQuestions := quiz()
+	end := time.Since(start)
 	fmt.Printf("You got %d / %d correct\n", numCorrect, numQuestions)
+	fmt.Printf("and took %v seconds", end)
 }
