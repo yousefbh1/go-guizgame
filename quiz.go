@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/csv"
+	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -45,8 +46,8 @@ func quiz(timeout <-chan time.Time) (int, int) {
 		case input := <-answerCh:
 			if input == answer {
 				numCorrect++
-				numQuestions++
 			}
+			numQuestions++
 		}
 	}
 	return numCorrect, numQuestions
@@ -54,8 +55,10 @@ func quiz(timeout <-chan time.Time) (int, int) {
 
 func main() {
 
+	timeoutFlag := flag.Duration("timeout", 30*time.Second, "how long the quiz should run")
+	flag.Parse()
 	start := time.Now()
-	timeout := time.After(3 * time.Second)
+	timeout := time.After(*timeoutFlag)
 
 	// numCorrect, numQuestions := go quiz()
 	var numCorrect, numQuestions int
